@@ -1,6 +1,6 @@
 Name:           gr-satellites-next
 Version:        5.8.0git
-Release:        2
+Release:        3
 Summary:        GNU Radio OOT module with a collection of decoders for Amateur satellites; Main-branch
 
 License:        GPL-3.0-or-later
