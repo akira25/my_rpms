@@ -1,6 +1,6 @@
 Name:           ucode-next
 Version:        0.0.2025git
-Release:        2
+Release:        3
 Summary:        JavaScript-like language with optional templating; Main-branch
 
 License:        ISC
