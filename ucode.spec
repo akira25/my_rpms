@@ -1,5 +1,5 @@
 Name:           ucode
-Version:        0.0.20231102
+Version:        0.0.20250529
 Release:        %autorelease
 Summary:        JavaScript-like language with optional templating
 
