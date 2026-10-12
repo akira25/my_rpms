@@ -1,0 +1,31 @@
+--- a/itpp/CMakeLists.txt	2013-07-06 11:11:56.000000000 +0200
++++ b/itpp/CMakeLists.txt	2015-09-18 16:49:09.537591338 +0200
+@@ -45,6 +45,8 @@ include_directories ( ${CMAKE_BINARY_DIR
+                       ${FFT_INCLUDES}
+                     )
+ 
++include(GNUInstallDirs)
++
+ if (ITPP_SHARED_LIB)
+   add_library (${libitpp_target} SHARED ${ITPP_SRCS})
+ else()
+@@ -68,9 +70,9 @@ set_target_properties(${libitpp_target}
+ 
+ #library
+ install(TARGETS ${libitpp_target}
+-        RUNTIME DESTINATION bin
+-        LIBRARY DESTINATION lib
+-        ARCHIVE DESTINATION lib)
++	RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
++	LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
++	ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR})
+ 
+ #headers
+ install(DIRECTORY ${CMAKE_SOURCE_DIR}/itpp DESTINATION include FILES_MATCHING PATTERN "*.h")
+@@ -111,5 +113,5 @@ if (UNIX)
+   install(FILES ${CMAKE_BINARY_DIR}/itpp-config DESTINATION bin PERMISSIONS OWNER_READ OWNER_EXECUTE
+     GROUP_READ GROUP_EXECUTE WORLD_READ WORLD_EXECUTE)
+   install(FILES ${CMAKE_BINARY_DIR}/itpp-config.1 DESTINATION share/man/man1)
+-  install(FILES ${CMAKE_BINARY_DIR}/itpp.pc DESTINATION lib/pkgconfig)
++  install(FILES ${CMAKE_BINARY_DIR}/itpp.pc DESTINATION ${CMAKE_INSTALL_LIBDIR}/pkgconfig)
+ endif()
