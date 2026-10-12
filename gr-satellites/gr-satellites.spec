@@ -1,30 +1,33 @@
 Name:           gr-satellites
-Version:        5.7.0
+Version:        5.9.0
 Release:        %autorelease
 Summary:        GNU Radio OOT module with a collection of decoders for Amateur satellites
 
 License:        GPL-3.0-or-later
 URL:            https://gr-satellites.readthedocs.io
-Source:         https://github.com/daniestevez/%{name}/archive/refs/tags/v%{version}.tar.gz
+Source:         https://github.com/daniestevez/%{name}/archive/refs/tags/v%{version}.tar.gz#/%{name}-%{version}.tar.gz
 
+BuildRequires:  bzip2
 BuildRequires:  cmake
-BuildRequires:  gcc
-BuildRequires:  gcc-g++
+BuildRequires:  gcc-c++
+BuildRequires:  fmt-devel
 BuildRequires:  gmp-devel
-BuildRequires:  gnupg2
 BuildRequires:  gnuradio-devel
 BuildRequires:  liborc-devel
 BuildRequires:  libsndfile-devel
-BuildRequires:  make
 BuildRequires:  pybind11-devel
 BuildRequires:  python3-devel
+BuildRequires:  python3-numpy
 BuildRequires:  spdlog-devel
-BuildRequires:  texinfo
+# for the test suite
+BuildRequires:  python3-construct
+BuildRequires:  python3-requests
+BuildRequires:  python3-websocket-client
 
-Requires:  gnuradio
-Requires:  python3-construct
-Requires:  python3-requests
-Requires:  python3-websocket-client
+Requires:       gnuradio%{?_isa}
+Requires:       python3-construct
+Requires:       python3-requests
+Requires:       python3-websocket-client
 
 %description
 gr-satellites is a GNU Radio out-of-tree module encompassing a collection
@@ -51,74 +54,50 @@ other satellites or other ground station solutions. Some of the low level blocks
 in gr-satellites are also useful for other kinds of RF communications protocols.
 
 %package devel
-Summary: Development files for gr-satellites
-Requires: %{name}%{?_isa} = %{version}-%{release}
-Requires: gnuradio-devel
-Requires: python3-construct
-Requires: python3-requests
-Requires: python3-websocket-client
+Summary:        Development files for gr-satellites
+Requires:       %{name}%{?_isa} = %{version}-%{release}
+Requires:       gnuradio-devel
 
 %description devel
-Development files for gr-satellites
+Header files and CMake configuration for building software against
+gr-satellites.
 
 %prep
 %autosetup
 
 %build
-%cmake -DCMAKE_BUILD_TYPE=Release
+%cmake -DCMAKE_BUILD_TYPE=Release -DENABLE_DOXYGEN=OFF
 %cmake_build
 
 %install
 %cmake_install
-
-# repair wrong line endings, merged upstream already. Will be obsolete with
-# versions after 5.6.0
-for file in %{buildroot}%{python3_sitearch}/satellites/telemetry/{cute_70cm,inspiresat_1}.py; do
-    sed -i 's/\r$//' $file
-done
-
-# make python scripts executable
-for file in %{buildroot}%{python3_sitearch}/satellites/*.py; do
-    chmod a+x $file
-done
-for file in %{buildroot}%{python3_sitearch}/satellites/ccsds/*.py; do
-   chmod a+x $file
-done
-for file in %{buildroot}%{python3_sitearch}/satellites/components/*.py; do
-   chmod a+x $file
-done
-for file in %{buildroot}%{python3_sitearch}/satellites/components/{datasinks,datasources,deframers,demodulators,transports}/*.py; do
-   chmod a+x $file
-done
-for file in %{buildroot}%{python3_sitearch}/satellites/core/*.py; do
-   chmod a+x $file
-done
-for file in %{buildroot}%{python3_sitearch}/satellites/{filereceiver,hier,satyaml,telemetry,usp,utils}/*.py; do
-   chmod a+x $file
-done
+# library modules are not meant to be executed directly
+find %{buildroot}%{python3_sitearch}/satellites -name '*.py' ! -perm /111 \
+    -exec sed -i '1{/^#!/d}' {} +
 
 %check
-make test
+# qa_mobitex_fec_block and qa_mobitex_deframer have timing issues and fail
+# intermittently on COPR
+%ctest -E '^(qa_mobitex_fec_block|qa_mobitex_deframer)$'
 
 %files
-%doc README.md
 %license LICENSE
-%{_bindir}/gr_satellites*
+%doc README.md
+%{_bindir}/gr_satellites
+%{_bindir}/gr_satellites_ssdv
 %{_bindir}/smog_p_spectrum
-%{_libdir}/cmake/satellites/*
-%{_libdir}/libgnuradio-satellites.so*
-%{python3_sitearch}/satellites/*
-%{_datadir}/gnuradio/grc/blocks/*
-%{_datadir}/man/man1/*
-
+%{_libdir}/libgnuradio-satellites.so.*
+%{python3_sitearch}/satellites/
+%{_datadir}/gnuradio/grc/blocks/satellites_*
+%{_datadir}/gnuradio/grc/blocks/variable_time_format_parameters.block.yml
+%{_mandir}/man1/gr_satellites.1*
+%{_mandir}/man1/gr_satellites_ssdv.1*
+%{_mandir}/man1/smog_p_spectrum.1*
 
 %files devel
-%doc README.md
-%license LICENSE
-%{_includedir}/satellites/*
-%{_libdir}/cmake/satellites/*
-%{python3_sitearch}/satellites/*
-%{_datadir}/gnuradio/grc/blocks/*
+%{_includedir}/satellites/
+%{_libdir}/libgnuradio-satellites.so
+%{_libdir}/cmake/satellites/
 
 %changelog
 %autochangelog
